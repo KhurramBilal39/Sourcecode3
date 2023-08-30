@@ -1,48 +1,96 @@
 package com.example.sourcecodepart3
 
+
+
+import android.content.ContentValues
+import android.content.Context
+import android.database.Cursor
+import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 
-import android.content.Context
-import android.database.sqlite.SQLiteDatabase
-import android.provider.Contacts.SettingsColumns.KEY
+class MyDBHelper(context: Context, factory: SQLiteDatabase.CursorFactory?) :
+    SQLiteOpenHelper(context, DATABASE_NAME, factory, DATABASE_VERSION) {
 
+    // below is the method for creating a database by a sqlite query
+    override fun onCreate(db: SQLiteDatabase) {
+        // below is a sqlite query, where column names
+        // along with their data types is given
+        val query = ("CREATE TABLE " + TABLE_NAME + " ("
+                + ID_COL + " INTEGER PRIMARY KEY, " +
+                NAME_COl + " TEXT," +
+                AGE_COL + " TEXT" + ")")
 
-class MyDBhelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
-
-
-    companion object {
-        private const val DATABASE_NAME = "ContactDB"
-        private const val DATABASE_VERSION = 1
-        private  const val TABLE_CONTACT = "contact"
-        private  const val KEY_ID:String = "id"
-        private  const val KEY_NAME:String = "name"
-        private  const val KEY_PHONE:String = "phone"
-
-        // Define your table name and column names here
-        // For example:
-        // const val TABLE_NAME = "my_table"
-        // const val COLUMN_ID = "_id"
-        // const val COLUMN_NAME = "name"
-        // const val COLUMN_AGE = "age"
-        // ...
+        // we are calling sqlite
+        // method for executing our query
+        db.execSQL(query)
     }
 
-    override fun onCreate(db: SQLiteDatabase?) {
-
-        db?.execSQL("CREATE TABLE  ${TABLE_CONTACT}" +
-                " $KEY_ID  INTEGER PRIMARY KEY AUTOINCREMENT, $KEY_NAME TEXT," +
-                "$KEY_PHONE  TEXT")
-        // Create your database tables here
-        // For example:
-        // val createTableQuery = "CREATE TABLE $TABLE_NAME ($COLUMN_ID INTEGER PRIMARY KEY, $COLUMN_NAME TEXT, $COLUMN_AGE INTEGER)"
-        // db?.execSQL(createTableQuery)
+    override fun onUpgrade(db: SQLiteDatabase, p1: Int, p2: Int) {
+        // this method is to check if table already exists
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME)
+        onCreate(db)
     }
 
-    override fun onUpgrade(db: SQLiteDatabase?, oldVersion: Int, newVersion: Int) {
-        // Handle database upgrades here
-        // For example, you can drop and recreate the table:
-        // val dropTableQuery = "DROP TABLE IF EXISTS $TABLE_NAME"
-        // db?.execSQL(dropTableQuery)
-        // onCreate(db)
+    // This method is for adding data in our database
+    fun addName(name : String, age : String ){
+
+        // below we are creating
+        // a content values variable
+        val values = ContentValues()
+
+        // we are inserting our values
+        // in the form of key-value pair
+        values.put(NAME_COl, name)
+        values.put(AGE_COL, age)
+
+        // here we are creating a
+        // writable variable of
+        // our database as we want to
+        // insert value in our database
+        val db = this.writableDatabase
+
+        // all values are inserted into database
+        db.insert(TABLE_NAME, null, values)
+
+        // at last we are
+        // closing our database
+        db.close()
+    }
+
+    // below method is to get
+    // all data from our database
+    fun  getName(): Cursor? {
+
+        // here we are creating a readable
+        // variable of our database
+        // as we want to read value from it
+        val db = this.readableDatabase
+
+        // below code returns a cursor to
+        // read data from the database
+        return db.rawQuery("SELECT * FROM " + TABLE_NAME, null)
+
+    }
+
+    companion object{
+        // here we have defined variables for our database
+
+        // below is variable for database name
+        private val DATABASE_NAME = "GEEKS_FOR_GEEKS"
+
+        // below is the variable for database version
+        private val DATABASE_VERSION = 1
+
+        // below is the variable for table name
+        val TABLE_NAME = "gfg_table"
+
+        // below is the variable for id column
+        val ID_COL = "id"
+
+        // below is the variable for name column
+        val NAME_COl = "name"
+
+        // below is the variable for age column
+        val AGE_COL = "age"
     }
 }
